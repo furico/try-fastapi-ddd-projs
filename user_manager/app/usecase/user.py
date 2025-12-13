@@ -1,6 +1,6 @@
 from typing import assert_never
-from domain.user import User, ActiveUser, BannedUser, ban
-from domain.repository import UserRepository
+from app.domain.user import User, ActiveUser, BannedUser, ban
+from app.domain.repository import UserRepository
 
 
 def get_user(

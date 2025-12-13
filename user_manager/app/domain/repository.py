@@ -1,5 +1,5 @@
 from typing import Protocol
-from domain.user import User
+from app.domain.user import User
 
 
 class UserRepository(Protocol):
