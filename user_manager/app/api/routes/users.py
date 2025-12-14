@@ -1,9 +1,9 @@
 from typing import assert_never
 
 from fastapi import APIRouter, Depends, HTTPException
-from typing_extensions import assert_never
 
 from app.api.deps import get_user_repository
+from app.api.schemas.user import UserResponse
 from app.domain.user import ActiveUser, BannedUser
 from app.infra.memory_user_repository import InMemoryUserRepository
 from app.usecase.user import ban_user, get_user, register_user
@@ -11,21 +11,21 @@ from app.usecase.user import ban_user, get_user, register_user
 router = APIRouter()
 
 
-@router.post("/users")
+@router.post("/users", response_model=UserResponse)
 def create_user(
     user_id: int,
     email: str,
     repo: InMemoryUserRepository = Depends(get_user_repository),
 ):
     user = register_user(user_id, email, repo)
-    return {
-        "user_id": user.user_id,
-        "email": user.email,
-        "status": "active",
-    }
+    return UserResponse(
+        user_id=user.user_id,
+        email=user.email,
+        status="active",
+    )
 
 
-@router.get("/users/{user_id}")
+@router.get("/users/{user_id}", response_model=UserResponse)
 def read_user(
     user_id: int,
     repo: InMemoryUserRepository = Depends(get_user_repository),
@@ -43,14 +43,14 @@ def read_user(
         case _:
             assert_never(user)
 
-    return {
-        "user_id": user.user_id,
-        "email": user.email,
-        "status": status,
-    }
+    return UserResponse(
+        user_id=user.user_id,
+        email=user.email,
+        status=status,
+    )
 
 
-@router.post("/users/{user_id}/ban")
+@router.post("/users/{user_id}/ban", response_model=UserResponse)
 def ban_user_api(
     user_id: int,
     repo: InMemoryUserRepository = Depends(get_user_repository),
@@ -60,8 +60,8 @@ def ban_user_api(
     if banned is None:
         raise HTTPException(status_code=400, detail="Cannot ban user")
 
-    return {
-        "user_id": banned.user_id,
-        "email": banned.email,
-        "status": "banned",
-    }
+    return UserResponse(
+        user_id=banned.user_id,
+        email=banned.email,
+        status="banned",
+    )
