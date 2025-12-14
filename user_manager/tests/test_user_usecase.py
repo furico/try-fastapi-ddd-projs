@@ -1,6 +1,6 @@
-from app.infra.memory_user_repository import InMemoryUserRepository
-from app.usecase.user import register_user, get_user, ban_user
 from app.domain.user import ActiveUser, BannedUser
+from app.infra.memory_user_repository import InMemoryUserRepository
+from app.usecase.user import ban_user, get_user, register_user
 
 
 def test_register_and_get_user():
