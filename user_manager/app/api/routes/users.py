@@ -1,10 +1,8 @@
-from typing import assert_never
-
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.api.deps import get_user_repository
+from app.api.presenters.user import to_user_response
 from app.api.schemas.user import UserResponse
-from app.domain.user import ActiveUser, BannedUser
 from app.infra.memory_user_repository import InMemoryUserRepository
 from app.usecase.user import ban_user, get_user, register_user
 
@@ -18,11 +16,7 @@ def create_user(
     repo: InMemoryUserRepository = Depends(get_user_repository),
 ):
     user = register_user(user_id, email, repo)
-    return UserResponse(
-        user_id=user.user_id,
-        email=user.email,
-        status="active",
-    )
+    return to_user_response(user)
 
 
 @router.get("/users/{user_id}", response_model=UserResponse)
@@ -35,19 +29,7 @@ def read_user(
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    match user:
-        case ActiveUser():
-            status = "active"
-        case BannedUser():
-            status = "banned"
-        case _:
-            assert_never(user)
-
-    return UserResponse(
-        user_id=user.user_id,
-        email=user.email,
-        status=status,
-    )
+    return to_user_response(user)
 
 
 @router.post("/users/{user_id}/ban", response_model=UserResponse)
@@ -60,8 +42,4 @@ def ban_user_api(
     if banned is None:
         raise HTTPException(status_code=400, detail="Cannot ban user")
 
-    return UserResponse(
-        user_id=banned.user_id,
-        email=banned.email,
-        status="banned",
-    )
+    return to_user_response(banned)
